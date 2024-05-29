@@ -100,7 +100,11 @@ globalThis.hardAssign = function (obj, src) {
   if (obj != src) {
     deleteAll(obj);
   }
-  Object.setPrototypeOf(obj, src);
+  try{
+    Object.setPrototypeOf(obj, src);
+  }catch(e){
+    Object.setPrototypeOf(obj, Object.getPrototypeOf(src));
+  }
   overwrite(obj, src);
   legalizeAll(obj, src);
   return obj;
@@ -119,25 +123,25 @@ globalThis.concatUniqueInPlace = function (target, source) {
 globalThis.OP = function (obj, param, op, val) {
   if (arguments.length == 4) {
     switch (op) {
-      case "??=":
+      case "??:":
         obj[param] = obj[param] ?? val;
         return obj[param];
-      case "=??":
+      case ":??":
         obj[param] = val ?? obj[param];
-      case "||=":
+      case "||:":
         obj[param] = obj[param] || val;
         return obj[param];
-      case "=||":
+      case ":||":
         obj[param] = val || obj[param];
         return obj[param];
-      case "&&=":
+      case "&&:":
         obj[param] = obj[param] && val;
         return obj[param];
-      case "=&&":
+      case ":&&":
         obj[param] = val && obj[param];
-      case "{}=":
+      case "{}:":
         return hardAssign(obj[param] ?? {}, val ?? {});
-      case "[]=":
+      case "[]:":
         obj[param] = concatUnique(obj[param], val);
     }
   }
@@ -169,9 +173,30 @@ globalThis.OP = function (obj, param, op, val) {
   return obj;
 };
 
-let a = {};
-OP(a, "{}=", new Response("test"));
+Object.defineProperty(Object.prototype,'??=',{value:function(obj){return OP(this,"??=",obj);}});
 
+Object.defineProperty(Object.prototype,'=??',{value:function(obj){return OP(this,"=??",obj);}});
+
+Object.defineProperty(Object.prototype,'||=',{value:function(obj){return OP(this,"||=",obj);}});
+
+Object.defineProperty(Object.prototype,'=||',{value:function(obj){return OP(this,"=||",obj);}});
+
+Object.defineProperty(Object.prototype,'&&=',{value:function(obj){return OP(this,"&&=",obj);}});
+
+Object.defineProperty(Object.prototype,'=&&',{value:function(obj){return OP(this,"=&&",obj);}});
+
+Object.defineProperty(Object.prototype,'[]=',{value:function(obj){return OP(this,"[]=",obj);}});
+
+Object.defineProperty(Object.prototype,'{}=',{value:function(obj){return OP(this,"{}=",obj);}});
+
+Object.defineProperty(Object.prototype,'()=',{value:function(fn,args){return OP(this,"{}=",this[fn](...args));}});
+
+let a = {};
+a["{}="](new Response("test"));
+let str = '?????';
+
+str['()=']('replaceAll',['?','7']);
+console.log(str);
 void (async function () {
   console.log(isLegal);
   console.log(await a.text());
