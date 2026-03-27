@@ -9,7 +9,7 @@ try {
     globalThis.isLegal = false;
   }
 }
-globalThis.overwrite = function (obj, prop, val) {
+globalThis.overwrite = function(obj, prop, val) {
   Object.defineProperty(obj, prop, {
     value: val,
     writable: true,
@@ -18,7 +18,7 @@ globalThis.overwrite = function (obj, prop, val) {
   });
   return obj;
 };
-globalThis.undefine = function (obj, prop, val) {
+globalThis.undefine = function(obj, prop, val) {
   Object.defineProperty(obj, prop, {
     value: val,
     writable: true,
@@ -27,7 +27,7 @@ globalThis.undefine = function (obj, prop, val) {
   });
   return obj;
 };
-globalThis.overwriteAll = function (obj, src) {
+globalThis.overwriteAll = function(obj, src) {
   let keys = Object.keys(src).concat(
     Object.keys(Object.getOwnPropertyDescriptors(src)),
   );
@@ -45,19 +45,19 @@ globalThis.overwriteAll = function (obj, src) {
   }
   return obj;
 };
-globalThis.legalize = function (obj, src, prop) {
+globalThis.legalize = function(obj, src, prop) {
   if (
     !isLegal &&
     `${typeof src[`${prop}`]}`.toLowerCase().includes("function") &&
     `${src[`${prop}`]}`.includes("native code")
   ) {
-    obj[`${prop}`] = function () {
+    obj[`${prop}`] = function() {
       return src[`${prop}`](...arguments);
     };
   }
   return obj;
 };
-globalThis.legalizeAll = function (obj, src) {
+globalThis.legalizeAll = function(obj, src) {
   if (Object.getPrototypeOf(obj) == Object.getPrototypeOf(src)) {
     return obj;
   }
@@ -70,7 +70,7 @@ globalThis.legalizeAll = function (obj, src) {
   }
   return obj;
 };
-globalThis.del = function (obj, prop) {
+globalThis.del = function(obj, prop) {
   overwrite(obj, prop, undefined);
   delete obj[prop];
   if (obj[prop]) {
@@ -78,7 +78,7 @@ globalThis.del = function (obj, prop) {
   }
   return obj;
 };
-globalThis.deleteAll = function (obj) {
+globalThis.deleteAll = function(obj) {
   let keys = Object.keys(obj).concat(
     Object.keys(Object.getOwnPropertyDescriptors(obj)),
   );
@@ -96,23 +96,23 @@ globalThis.deleteAll = function (obj) {
   }
   return obj;
 };
-globalThis.hardAssign = function (obj, src) {
+globalThis.hardAssign = function(obj, src) {
   if (obj != src) {
     deleteAll(obj);
   }
-  try{
+  try {
     Object.setPrototypeOf(obj, src);
-  }catch(e){
+  } catch (e) {
     Object.setPrototypeOf(obj, Object.getPrototypeOf(src));
   }
   overwrite(obj, src);
   legalizeAll(obj, src);
   return obj;
 };
-globalThis.concatUnique = function (arr1, arr2) {
+globalThis.concatUnique = function(arr1, arr2) {
   return Array.from(new Set(arr1.concat(arr2)));
 };
-globalThis.concatUniqueInPlace = function (target, source) {
+globalThis.concatUniqueInPlace = function(target, source) {
   source.forEach((item) => {
     if (!target.includes(item)) {
       target.push(item);
@@ -120,7 +120,7 @@ globalThis.concatUniqueInPlace = function (target, source) {
   });
 };
 
-globalThis.OP = function (obj, param, op, val) {
+globalThis.OP = function(obj, param, op, val) {
   if (arguments.length == 4) {
     switch (op) {
       case "??:":
@@ -173,31 +173,67 @@ globalThis.OP = function (obj, param, op, val) {
   return obj;
 };
 
-Object.defineProperty(Object.prototype,'??=',{value:function(obj){return OP(this,"??=",obj);}});
+Object.defineProperty(Object.prototype, '??=', {
+  value: function(obj) {
+    return OP(this, "??=", obj);
+  }
+});
 
-Object.defineProperty(Object.prototype,'=??',{value:function(obj){return OP(this,"=??",obj);}});
+Object.defineProperty(Object.prototype, '=??', {
+  value: function(obj) {
+    return OP(this, "=??", obj);
+  }
+});
 
-Object.defineProperty(Object.prototype,'||=',{value:function(obj){return OP(this,"||=",obj);}});
+Object.defineProperty(Object.prototype, '||=', {
+  value: function(obj) {
+    return OP(this, "||=", obj);
+  }
+});
 
-Object.defineProperty(Object.prototype,'=||',{value:function(obj){return OP(this,"=||",obj);}});
+Object.defineProperty(Object.prototype, '=||', {
+  value: function(obj) {
+    return OP(this, "=||", obj);
+  }
+});
 
-Object.defineProperty(Object.prototype,'&&=',{value:function(obj){return OP(this,"&&=",obj);}});
+Object.defineProperty(Object.prototype, '&&=', {
+  value: function(obj) {
+    return OP(this, "&&=", obj);
+  }
+});
 
-Object.defineProperty(Object.prototype,'=&&',{value:function(obj){return OP(this,"=&&",obj);}});
+Object.defineProperty(Object.prototype, '=&&', {
+  value: function(obj) {
+    return OP(this, "=&&", obj);
+  }
+});
 
-Object.defineProperty(Object.prototype,'[]=',{value:function(obj){return OP(this,"[]=",obj);}});
+Object.defineProperty(Object.prototype, '[]=', {
+  value: function(obj) {
+    return OP(this, "[]=", obj);
+  }
+});
 
-Object.defineProperty(Object.prototype,'{}=',{value:function(obj){return OP(this,"{}=",obj);}});
+Object.defineProperty(Object.prototype, '{}=', {
+  value: function(obj) {
+    return OP(this, "{}=", obj);
+  }
+});
 
-Object.defineProperty(Object.prototype,'()=',{value:function(fn,args){return OP(this,"{}=",this[fn](...args));}});
+Object.defineProperty(Object.prototype, '()=', {
+  value: function(fn, args) {
+    return OP(this, "{}=", this[fn](...args));
+  }
+});
 
 let a = {};
 a["{}="](new Response("test"));
 let str = '?????';
 
-str['()=']('replaceAll',['?','7']);
+str['()=']('replaceAll', ['?', '7']);
 console.log(str);
-void (async function () {
+void(async function() {
   console.log(isLegal);
   console.log(await a.text());
   del(a, "text");
